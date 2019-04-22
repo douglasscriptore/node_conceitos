@@ -1,2 +1,5 @@
 node_modules/
 yarn.lock
+readme.txt
+.vscode/
+yarn-error.log

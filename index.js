@@ -1,34 +1,37 @@
-const express = require("express");
+const express = require('express')
+const nunjucks = require('nunjucks')
 
-/* criando servidor node */
-const app = express();
+// criando servidor node
+const app = express()
 
-/* Um middleware é um interceptador que pdoe bloquear a requisição para um processamento e liberar ela em seguida pelo metodo next */
-const logMiddleware = (req, res, next) => {
-  console.log(
-    `HOST: ${req.headers.host}`,
-    `URL: ${req.url}`,
-    `METHOD: ${req.method}`
-  );
+// primeiro parametro nome da pasta que estarão nossas views
+nunjucks.configure('views', {
+  autoescape: true, // para manipular o nome dos arquivos
+  express: app, // passa a variavel do nosso express
+  watch: true // toda vez que alterar 1 arquivo não precisa restart server
+})
 
-  // adicionar informações dentro da requisição para utilizar nas demais rotas
-  req.appName = 'GoNode';
+// informa para o express para ele saber como lidar com informações provenientes de um formulario html
+app.use(express.urlencoded({ extended: true }))
 
-  return next()
-};
+// informar a extensão que será utiliza nos arquivos
+app.set('view engine', 'njk')
 
-// faz com que todas as rotas utilziem o middleware
-app.use(logMiddleware);
+const users = ['Douglas', 'Lari', 'Diego', 'Rodrigo']
 
-app.get("/", (req, res) => {
-  res.send(`Bem vindo ao ${req.appName}, ${req.query.name}`);
-});
+// Rota
+app.get('/', (req, res) => {
+  res.render('list', { users })
+})
 
-app.get("/nome/:name", (req, res) => {
-  res.json({
-    message: `Hi, ${req.params.name}`
-  });
-});
+app.get('/new', (req, res) => {
+  return res.render('new')
+})
+
+app.post('/create', (req, res) => {
+  users.push(req.body.user)
+  return res.redirect('/')
+})
 
 // inicia o servidor na porta 3000
-app.listen(3000);
+app.listen(3000)
